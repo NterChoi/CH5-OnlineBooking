@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { UserService } from './user.service';
 import { SignupDto } from './dto/signup.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('user')
 export class UserController {
@@ -12,8 +13,10 @@ export class UserController {
     return await this.userService.create(createUserDto);
   }
 
-  @Get('login')
-  async login(){}
+  @Post('login')
+  async login(@Body() loginDTO: LoginDto){
+    return await this.userService.login(loginDTO);
+  }
 
 
   @Get(':id')

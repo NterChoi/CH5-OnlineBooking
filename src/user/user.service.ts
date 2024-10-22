@@ -7,6 +7,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from './types/userRole.type';
 import { Point } from '../point/entities/point.entity';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class UserService {
@@ -20,7 +21,7 @@ export class UserService {
 
   async create(createUserDto: SignupDto): Promise<User> {
     return await this.entityManager.transaction(async (manager) => {
-      const existingUser = await this.findByEmail(createUserDto.email);
+      const existingUser = await this.userRepository.findOneBy({email: createUserDto.email});
       if (existingUser) {
         throw new ConflictException('이미 사용중인 이메일입니다.');
       }
@@ -29,6 +30,7 @@ export class UserService {
         email: createUserDto.email,
         password: createUserDto.password,
         nickname: createUserDto.nickname,
+        role: createUserDto.role,
       });
       // 2. 포인트 지급
       await this.pointRepository.save({
@@ -38,6 +40,12 @@ export class UserService {
       });
       return user;
     });
+  }
+
+  async login(loginDTO: LoginDto) {
+    const user = await this.userRepository.findOne({
+
+    })
   }
 
   findAll() {
@@ -54,10 +62,5 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
-  }
-
-  private async findByEmail(email: string) {
-    return await this.userRepository.findOneBy({ email });
-
   }
 }
