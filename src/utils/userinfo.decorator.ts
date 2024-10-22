@@ -6,3 +6,5 @@ export const UserInfo = createParamDecorator(
     return request.user ? request.user : null;
   },
 );
+
+// 통과
