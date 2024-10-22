@@ -1,6 +1,5 @@
 import { Role } from '../types/userRole.type';
-import { BeforeInsert, Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import bcrypt from 'bcrypt';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Point } from '../../point/entities/point.entity';
 
 @Entity({
