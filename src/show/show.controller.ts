@@ -1,13 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ShowService } from './show.service';
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
+import { RolesGuard } from '../guards/roles/roles.guard';
 
 @Controller('show')
+@UseGuards(RolesGuard)
 export class ShowController {
   constructor(private readonly showService: ShowService) {}
 
-  @Post()
+  @Post('register')
   create(@Body() createShowDto: CreateShowDto) {
     return this.showService.create(createShowDto);
   }

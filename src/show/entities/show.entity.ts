@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Status } from '../type/showStatus.type';
 
 @Entity({
   name: 'shows',
@@ -7,7 +8,7 @@ export class Show {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   image: string;
 
   @Column({ type: 'varchar', nullable: false })
@@ -19,7 +20,13 @@ export class Show {
   @Column({ type: 'text', nullable: true })
   info: string;
 
-  @Column({type: 'enum', nullable: false})
-  status:
+  @Column({ type: 'enum', nullable: false })
+  status: Status;
+
+  @Column({ type: 'date', nullable: false })
+  openDate: string;
+
+  @Column({ type: 'date', nullable: true })
+  endDate: string;
 
 }
