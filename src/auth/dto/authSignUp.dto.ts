@@ -1,8 +1,8 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { Role } from '../types/userRole.type';
 import { Match } from '../../utils/match.decorator';
+import { Role } from '../../user/types/userRole.type';
 
-export class SignupDto {
+export class AuthSignUpDto {
   @IsEmail()
   @IsNotEmpty({ message: '이메일을 입력해주세요' })
   email: string;

@@ -8,11 +8,14 @@ export class Point {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'number', nullable: false })
+  @Column({ type: 'int', nullable: false })
   value: number;
 
   @Column({ type: 'varchar', nullable: false })
   description: string;
+
+  @Column({ type: 'number', nullable: false })
+  userId: number;
 
   @ManyToOne(() => User, (user) => user.point)
   user: User;
