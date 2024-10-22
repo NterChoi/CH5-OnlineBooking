@@ -12,10 +12,9 @@ export class UserController {
     return await this.userService.create(createUserDto);
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
+  @Get('login')
+  async login(){}
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
