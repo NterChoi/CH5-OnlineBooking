@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignupDto } from './dto/signup.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
@@ -8,6 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Role } from './types/userRole.type';
 import { Point } from '../point/entities/point.entity';
 import { LoginDto } from './dto/login.dto';
+import _ from 'lodash';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -21,7 +23,7 @@ export class UserService {
 
   async create(createUserDto: SignupDto): Promise<User> {
     return await this.entityManager.transaction(async (manager) => {
-      const existingUser = await this.userRepository.findOneBy({email: createUserDto.email});
+      const existingUser = await this.userRepository.findOneBy({ email: createUserDto.email });
       if (existingUser) {
         throw new ConflictException('이미 사용중인 이메일입니다.');
       }
@@ -43,9 +45,18 @@ export class UserService {
   }
 
   async login(loginDTO: LoginDto) {
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepository.findOneBy({ email: loginDTO.email });
+    if (_.isNil(user)) {
+      throw new UnauthorizedException('이메일을 확인해주세요.');
+    }
+    if (!(await compare(loginDTO.password, user.password))) {
+      throw new UnauthorizedException('비밀번호를 확인해주세요.');
+    }
 
-    })
+    const payload = { email: loginDTO.email, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 
   findAll() {
