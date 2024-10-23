@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Status } from '../type/showStatus.type';
 
 export class CreateShowDto {
@@ -20,10 +20,11 @@ export class CreateShowDto {
   @IsNotEmpty({message: '판매상태를 입력해주세요.'})
   status: Status;
 
-  @IsDate()
+  @IsString()
   @IsNotEmpty({ message: '개봉일자를 입력해주세요.' })
   openDate: string;
 
-  @IsDate()
-  endDate: string;
+  @IsString()
+  @IsOptional()
+  endDate?: string;
 }

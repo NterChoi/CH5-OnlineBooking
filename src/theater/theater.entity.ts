@@ -12,7 +12,7 @@ export class Theater {
   @Column({ type: 'varchar', unique: true, nullable: false })
   name: string;
 
-  @Column({ type: 'string', nullable: false })
+  @Column({ type: 'varchar', nullable: false })
   address: string;
 
   @OneToMany(() => Box, (box) => box.theater)

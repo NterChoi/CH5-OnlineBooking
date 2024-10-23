@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateScheduleDto {
 
@@ -14,7 +14,7 @@ export class CreateScheduleDto {
   @IsNotEmpty({ message: '상영관을 선택해주세요' })
   boxId: number;
 
-  @IsDate()
+  @IsString()
   @IsNotEmpty({ message: '상영 시간을 입력해주세요' })
   showTime: string;
 }

@@ -21,7 +21,7 @@ export class Show {
   @Column({ type: 'text', nullable: true })
   info: string;
 
-  @Column({ type: 'enum', nullable: false })
+  @Column({ type: 'enum', enum:Status, nullable: false })
   status: Status;
 
   @Column({ type: 'date', nullable: false })
