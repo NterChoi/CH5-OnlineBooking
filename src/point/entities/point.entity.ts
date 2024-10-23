@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
 @Entity({
-  name: 'point',
+  name: 'points',
 })
 export class Point {
   @PrimaryGeneratedColumn()
