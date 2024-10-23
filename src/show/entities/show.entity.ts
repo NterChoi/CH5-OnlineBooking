@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Status } from '../type/showStatus.type';
+import { Schedule } from '../../schedule/entities/schedule.entity';
 
 @Entity({
   name: 'shows',
@@ -28,5 +29,8 @@ export class Show {
 
   @Column({ type: 'date', nullable: true })
   endDate: string;
+
+  @OneToMany(() => Schedule, (schedule) => schedule.show)
+  schedule: Schedule;
 
 }
