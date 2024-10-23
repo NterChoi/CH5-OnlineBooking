@@ -38,9 +38,9 @@ export class AuthService {
         role: authSignUpDto.role,
       });
       // 2. 포인트 지급
-      console.log(user);
+
       await manager.getRepository(Point).save({
-        userId: user.id,
+        user: user,
         value: 1000000,
         description: '가입 지급 포인트',
       });
