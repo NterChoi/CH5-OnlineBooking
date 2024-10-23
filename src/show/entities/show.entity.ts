@@ -8,7 +8,7 @@ export class Show {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ type: 'varchar', nullable: false })
   image: string;
 
   @Column({ type: 'varchar', nullable: false })
