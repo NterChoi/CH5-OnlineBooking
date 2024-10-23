@@ -9,6 +9,7 @@ import Joi from 'joi';
 import { User } from './user/entities/user.entity';
 import { Point } from './point/entities/point.entity';
 import { ShowModule } from './show/show.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -46,6 +47,7 @@ const typeOrmModuleOptions = {
     AuthModule,
     PointModule,
     ShowModule,
+    ScheduleModule,
   ],
   controllers: [],
   providers: [],
