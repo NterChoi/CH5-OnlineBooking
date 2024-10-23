@@ -1,11 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Show } from './entities/show.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ShowService {
-  create(createShowDto: CreateShowDto) {
-    return 'This action adds a new show';
+  constructor(
+    @InjectRepository(Show)
+    private readonly showRepository: Repository<Show>,
+  ) {}
+  async create(createShowDto: CreateShowDto) {
+    return await this.showRepository.save({
+      image: createShowDto.image,
+      name: createShowDto.name,
+      category: createShowDto.category,
+      info: createShowDto.info,
+      status: createShowDto.status,
+      openDate: createShowDto.openDate,
+      endDate: createShowDto.endDate,
+    });
   }
 
   findAll() {
