@@ -11,9 +11,6 @@ export class Schedule {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({type: 'datetime', nullable: false})
-  showTime: string;
-
   @ManyToOne(() => Show, (show) => show.schedule)
   show: Show
 
@@ -22,6 +19,9 @@ export class Schedule {
 
   @ManyToOne(() => Box, (box) => box.schedule)
   box: Box
+
+  @Column({type: 'datetime', nullable: false})
+  showTime: string;
 
 
 }
