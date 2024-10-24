@@ -7,7 +7,8 @@ import { Theater } from '../theater/theater.entity';
 import { Box } from '../box/box.entity';
 import { Status } from '../show/type/showStatus.type';
 import { Schedule } from './entities/schedule.entity';
-import { async } from 'rxjs';
+import { Seat } from '../seat/seat.entity';
+import { Grade } from '../seat/seatGrade.type';
 
 @Injectable()
 export class ScheduleService {
@@ -58,6 +59,27 @@ export class ScheduleService {
           box: box,
           showTime: createScheduleDto.showTime[i],
         });
+        for (let i = 1; i <= box.goldSeatCount; i++) {
+          await manager.getRepository(Seat).save({
+            grade: Grade.Gold,
+            seatNumber: i,
+            price: 50000,
+          });
+        }
+        for(let i = 1; i <= box.silverSeatCount; i++){
+          await manager.getRepository(Seat).save({
+            grade: Grade.Silver,
+            seatNumber: i,
+            price: 40000,
+          })
+        }
+        for(let i = 1; i <= box.bronzeSeatCount; i++){
+          await manager.getRepository(Seat).save({
+            grade: Grade.Bronze,
+            seatNumber: i,
+            price: 40000,
+          })
+        }
       }
     });
   }
