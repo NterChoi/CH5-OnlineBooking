@@ -20,7 +20,9 @@ export class Schedule {
   @ManyToOne(() => Box, (box) => box.schedule)
   box: Box
 
-  @Column({type: 'datetime', nullable: false})
+
+
+  @Column({type: 'timestamp', nullable: false})
   showTime: string;
 
 

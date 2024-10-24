@@ -43,18 +43,19 @@ export class ScheduleService {
       throw new BadRequestException('현재 상영 중이지 않는 영화입니다 확인해주세요');
     }
 
-    const showTime = new Date(createScheduleDto.showTime);
-    const now = new Date();
-    if (showTime < now) {
-      throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+    // const showTime = new Date(createScheduleDto.showTime);
+    // const now = new Date();
+    // if (showTime < now) {
+    //   throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+    // }
+    for (let i = 0; createScheduleDto.showTime.length; i++) {
+      await this.scheduleRepository.save({
+        show: show,
+        theater: theater,
+        box: box,
+        showTime: createScheduleDto.showTime[i],
+      });
     }
-
-    await this.scheduleRepository.save({
-      show: show,
-      theater: theater,
-      box: box,
-      showTime: createScheduleDto.showTime,
-    });
   }
 
   findAll() {
@@ -63,13 +64,5 @@ export class ScheduleService {
 
   findOne(id: number) {
     return `This action returns a #${id} schedule`;
-  }
-
-  update(id: number, updateScheduleDto: UpdateScheduleDto) {
-    return `This action updates a #${id} schedule`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} schedule`;
   }
 }

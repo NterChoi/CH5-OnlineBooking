@@ -16,5 +16,5 @@ export class CreateScheduleDto {
 
   @IsString()
   @IsNotEmpty({ message: '상영 시간을 입력해주세요' })
-  showTime: string;
+  showTime: string[];
 }
