@@ -23,19 +23,19 @@ export class ShowService {
     });
   }
 
-  findAll() {
-    return `This action returns all show`;
+  async findAll() {
+    return await this.showRepository.find({
+      select : {
+        image: true,
+        name: true,
+        category: true,
+        status: true,
+        openDate: true
+      }
+    });
   }
 
   findOne(id: number) {
     return `This action returns a #${id} show`;
-  }
-
-  update(id: number, updateShowDto: UpdateShowDto) {
-    return `This action updates a #${id} show`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} show`;
   }
 }

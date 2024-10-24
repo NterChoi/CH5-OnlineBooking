@@ -26,14 +26,4 @@ export class ShowController {
   findOne(@Param('id') id: string) {
     return this.showService.findOne(+id);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateShowDto: UpdateShowDto) {
-    return this.showService.update(+id, updateShowDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.showService.remove(+id);
-  }
 }

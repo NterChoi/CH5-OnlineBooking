@@ -90,8 +90,8 @@ export class ScheduleService {
     });
   }
 
-  findAll() {
-    return `This action returns all schedule`;
+  async findAll() {
+
   }
 
   findOne(id: number) {
