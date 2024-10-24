@@ -35,6 +35,21 @@ export class ShowService {
     });
   }
 
+  async findByCategory(category) {
+    return await this.showRepository.find({
+      select: {
+        image: true,
+        name: true,
+        category: true,
+        status: true,
+        openDate: true
+      },
+      where: {
+        category: category,
+      }
+    })
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} show`;
   }

@@ -20,7 +20,6 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {
   }
-
   async signUp(authSignUpDto: AuthSignUpDto) {
     return await this.entityManager.transaction(async (manager) => {
       const existingUser = await this.userRepository.findOneBy({ email: authSignUpDto.email });

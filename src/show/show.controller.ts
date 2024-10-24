@@ -1,7 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ShowService } from './show.service';
 import { CreateShowDto } from './dto/create-show.dto';
-import { UpdateShowDto } from './dto/update-show.dto';
 import { RolesGuard } from '../guards/roles/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../user/types/userRole.type';
@@ -20,6 +19,11 @@ export class ShowController {
   @Get()
   findAll() {
     return this.showService.findAll();
+  }
+
+  @Get('category')
+  findByCategory(@Param() category : string){
+    return this.showService.findByCategory(category);
   }
 
   @Get(':id')
