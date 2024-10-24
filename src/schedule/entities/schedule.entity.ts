@@ -1,8 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Show } from '../../show/entities/show.entity';
 import { Theater } from '../../theater/theater.entity';
 import { Box } from '../../box/box.entity';
+import { Seat } from '../../seat/seat.entity';
 
 @Entity({
   name: 'schedules',
@@ -24,5 +25,6 @@ export class Schedule {
   @Column({type: 'timestamp', nullable: false})
   showTime: Date;
 
-
+  @OneToMany(() => Seat, (seat) => seat.schedule)
+  seat: Seat;
 }

@@ -1,5 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Grade } from './seatGrade.type';
+import { Box } from '../box/box.entity';
+import { Schedule } from '../schedule/entities/schedule.entity';
 
 @Entity({
   name: 'seats',
@@ -14,10 +16,15 @@ export class Seat {
   @Column({ type: 'int', nullable: false })
   seatNumber: number;
 
-  @Column({ type: 'number', nullable: false })
+  @Column({ type: 'int', nullable: false })
   price: number;
 
   @Column({ type: 'boolean', nullable: false , default: false})
   isReserved: boolean;
 
+  @ManyToOne(() => Box, (box)=> box.seat)
+  box: Box
+
+  @ManyToOne(()=> Schedule, (schedule) => schedule.seat)
+  schedule: Schedule
 }
