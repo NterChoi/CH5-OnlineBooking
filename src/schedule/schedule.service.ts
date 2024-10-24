@@ -1,6 +1,5 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Show } from '../show/entities/show.entity';
 import { Repository } from 'typeorm';
@@ -44,11 +43,11 @@ export class ScheduleService {
     }
 
     // const showTime = new Date(createScheduleDto.showTime);
-    // const now = new Date();
-    // if (showTime < now) {
-    //   throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
-    // }
+    const now = new Date();
     for (let i = 0; createScheduleDto.showTime.length; i++) {
+      if (createScheduleDto.showTime[i] < now) {
+        throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+      }
       await this.scheduleRepository.save({
         show: show,
         theater: theater,

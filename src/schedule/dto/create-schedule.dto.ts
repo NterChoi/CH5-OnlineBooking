@@ -14,7 +14,7 @@ export class CreateScheduleDto {
   @IsNotEmpty({ message: '상영관을 선택해주세요' })
   boxId: number;
 
-  @IsString()
+  @IsDate()
   @IsNotEmpty({ message: '상영 시간을 입력해주세요' })
-  showTime: string[];
+  showTime: Date[];
 }

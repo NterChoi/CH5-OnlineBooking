@@ -23,7 +23,7 @@ export class Schedule {
 
 
   @Column({type: 'timestamp', nullable: false})
-  showTime: string;
+  showTime: Date;
 
 
 }
