@@ -1,16 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Show } from '../show/entities/show.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Theater } from '../theater/theater.entity';
 import { Box } from '../box/box.entity';
 import { Status } from '../show/type/showStatus.type';
 import { Schedule } from './entities/schedule.entity';
+import { async } from 'rxjs';
 
 @Injectable()
 export class ScheduleService {
   constructor(
+    @InjectEntityManager()
+    private readonly entityManger: EntityManager,
     @InjectRepository(Show)
     private readonly showRepository: Repository<Show>,
     @InjectRepository(Theater)
@@ -30,7 +33,7 @@ export class ScheduleService {
         theater: true,
       },
     });
-    console.log();
+
     const show = await this.showRepository.findOneBy({ id: createScheduleDto.showId });
     if (!theater) {
       throw new BadRequestException('존재하지 않는 극장입니다 확인해주세요.');
@@ -44,17 +47,19 @@ export class ScheduleService {
 
     // const showTime = new Date(createScheduleDto.showTime);
     const now = new Date();
-    for (let i = 0; createScheduleDto.showTime.length; i++) {
-      if (createScheduleDto.showTime[i] < now) {
-        throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+    return await this.entityManger.transaction(async (manager) => {
+      for (let i = 0; i < createScheduleDto.showTime.length; i++) {
+        if (createScheduleDto.showTime[i] < now) {
+          throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+        }
+        await manager.getRepository(Schedule).save({
+          show: show,
+          theater: theater,
+          box: box,
+          showTime: createScheduleDto.showTime[i],
+        });
       }
-      await this.scheduleRepository.save({
-        show: show,
-        theater: theater,
-        box: box,
-        showTime: createScheduleDto.showTime[i],
-      });
-    }
+    });
   }
 
   findAll() {

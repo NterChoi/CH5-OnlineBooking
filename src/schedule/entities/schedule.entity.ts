@@ -21,7 +21,6 @@ export class Schedule {
   box: Box
 
 
-
   @Column({type: 'timestamp', nullable: false})
   showTime: Date;
 

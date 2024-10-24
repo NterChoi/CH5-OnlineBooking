@@ -1,4 +1,5 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateScheduleDto {
 
@@ -14,7 +15,9 @@ export class CreateScheduleDto {
   @IsNotEmpty({ message: '상영관을 선택해주세요' })
   boxId: number;
 
-  @IsDate()
+  @IsArray()
+  @Type(() => Date)
+  @IsDate({ each: true })
   @IsNotEmpty({ message: '상영 시간을 입력해주세요' })
   showTime: Date[];
 }
