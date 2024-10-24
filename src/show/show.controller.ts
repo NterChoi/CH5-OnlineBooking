@@ -26,6 +26,11 @@ export class ShowController {
     return this.showService.findByCategory(category);
   }
 
+  @Get()
+  findByName(@Param('name') name : string){
+    return this.showService.findByName(name);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.showService.findOne(+id);

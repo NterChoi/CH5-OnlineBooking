@@ -35,7 +35,7 @@ export class ShowService {
     });
   }
 
-  async findByCategory(category) {
+  async findByCategory(category : string) {
     return await this.showRepository.find({
       select: {
         image: true,
@@ -46,6 +46,21 @@ export class ShowService {
       },
       where: {
         category: category,
+      }
+    })
+  }
+
+  findByName(name: string) {
+    return this.showRepository.find({
+      select: {
+        image: true,
+        name: true,
+        category: true,
+        status: true,
+        openDate: true
+      },
+      where: {
+        name : name
       }
     })
   }
