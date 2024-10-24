@@ -53,7 +53,7 @@ export class ScheduleService {
         if (createScheduleDto.showTime[i] < now) {
           throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
         }
-        await manager.getRepository(Schedule).save({
+        const schedule= await manager.getRepository(Schedule).save({
           show: show,
           theater: theater,
           box: box,
@@ -64,6 +64,8 @@ export class ScheduleService {
             grade: Grade.Gold,
             seatNumber: i,
             price: 50000,
+            box: schedule.box,
+            schedule: schedule
           });
         }
         for(let i = 1; i <= box.silverSeatCount; i++){
@@ -71,6 +73,8 @@ export class ScheduleService {
             grade: Grade.Silver,
             seatNumber: i,
             price: 40000,
+            box: schedule.box,
+            schedule: schedule
           })
         }
         for(let i = 1; i <= box.bronzeSeatCount; i++){
@@ -78,6 +82,8 @@ export class ScheduleService {
             grade: Grade.Bronze,
             seatNumber: i,
             price: 40000,
+            box: schedule.box,
+            schedule: schedule
           })
         }
       }
