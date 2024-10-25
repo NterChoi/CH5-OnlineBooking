@@ -1,4 +1,4 @@
-import { IsArray, IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsDate, IsNotEmpty, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateScheduleDto {

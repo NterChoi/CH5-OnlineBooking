@@ -3,7 +3,7 @@ import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Show } from './entities/show.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class ShowService {
@@ -50,22 +50,38 @@ export class ShowService {
     })
   }
 
-  findByName(name: string) {
-    return this.showRepository.find({
+  async findByName(name: string) {
+    return await this.showRepository.find({
       select: {
         image: true,
         name: true,
         category: true,
         status: true,
-        openDate: true
+        openDate: true,
       },
       where: {
-        name : name
-      }
-    })
+        name: Like(`%${name}%`),
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} show`;
+  async findOne(id: number) {
+    return await this.showRepository.findOne({
+      select:{
+        image : true,
+        name : true,
+        category: true,
+        info: true,
+        status: true,
+        openDate: true,
+        endDate: true,
+      },
+      relations:{
+        schedule: true
+      },
+      where: {
+        id: id,
+      },
+    });
   }
 }
