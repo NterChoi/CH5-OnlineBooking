@@ -15,6 +15,7 @@ import { Schedule } from './schedule/entities/schedule.entity';
 import { Theater } from './theater/theater.entity';
 import { Box } from './box/box.entity';
 import { Seat } from './seat/seat.entity';
+import { ReservationModule } from './reservation/reservation.module';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -53,6 +54,7 @@ const typeOrmModuleOptions = {
     PointModule,
     ShowModule,
     ScheduleModule,
+    ReservationModule,
   ],
   controllers: [],
   providers: [],

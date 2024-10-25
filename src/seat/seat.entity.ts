@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Grade } from './seatGrade.type';
 import { Box } from '../box/box.entity';
 import { Schedule } from '../schedule/entities/schedule.entity';
+import { ReservedSeat } from '../reservedSeat/reservedSeat.entity';
 
 @Entity({
   name: 'seats',
@@ -22,9 +23,12 @@ export class Seat {
   @Column({ type: 'boolean', nullable: false , default: false})
   isReserved: boolean;
 
-  @ManyToOne(() => Box, (box)=> box.seat)
-  box: Box
+  @ManyToOne(() => Box, (box) => box.seat)
+  box: Box;
 
-  @ManyToOne(()=> Schedule, (schedule) => schedule.seat)
-  schedule: Schedule
+  @ManyToOne(() => Schedule, (schedule) => schedule.seat)
+  schedule: Schedule;
+
+  @OneToMany(() => ReservedSeat, (reservedSeat) => reservedSeat.seat)
+  reservedSeat: ReservedSeat;
 }

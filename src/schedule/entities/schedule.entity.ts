@@ -4,6 +4,7 @@ import { Show } from '../../show/entities/show.entity';
 import { Theater } from '../../theater/theater.entity';
 import { Box } from '../../box/box.entity';
 import { Seat } from '../../seat/seat.entity';
+import { Reservation } from '../../reservation/entities/reservation.entity';
 
 @Entity({
   name: 'schedules',
@@ -27,4 +28,7 @@ export class Schedule {
 
   @OneToMany(() => Seat, (seat) => seat.schedule)
   seat: Seat;
+
+  @OneToMany(() => Reservation, (reservation) => reservation.schedule)
+  reservation: Reservation;
 }
