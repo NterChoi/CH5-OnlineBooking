@@ -26,6 +26,7 @@ export class ReservationService {
   ) {}
   // 선착순 예매
   async create(createReservationDto: CreateReservationDto, user : User) {
+    let totalPrice = 0;
     const schedule = await this.scheduleRepository.findOneBy({ id: createReservationDto.scheduleId });
     if (!schedule) {
       throw new NotFoundException('존재하지 않는 일정입니다 확인해주세요.');
@@ -40,10 +41,15 @@ export class ReservationService {
       throw new NotFoundException('예매할 수 있는 좌석이 없습니다.')
     }
 
+    for(let i = 0; i < createReservationDto.numberOfSpectators; i++){
+      totalPrice += seats[i].price
+    }
+
     const reservation = await this.reservationRepository.save({
       user: user,
       schedule: schedule,
       numberOfSpectators: createReservationDto.numberOfSpectators,
+      totalPrice: totalPrice,
     });
 
     for(let i =0 ; i < createReservationDto.numberOfSpectators; i++){
@@ -54,6 +60,12 @@ export class ReservationService {
         seat: seats[i],
       });
     }
+
+    await this.pointRepository.save({
+      user: user,
+      value: reservation.totalPrice,
+
+    })
 
 
 

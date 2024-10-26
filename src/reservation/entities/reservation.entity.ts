@@ -21,4 +21,7 @@ export class Reservation {
 
   @ManyToOne(()=> User, (user)=> user.reservation)
   user: User
+
+  @Column({ type: 'int', nullable: false })
+  totalPrice: number;
 }
