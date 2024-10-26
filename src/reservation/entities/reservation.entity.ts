@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Schedule } from '../../schedule/entities/schedule.entity';
 import { ReservedSeat } from '../../reservedSeat/reservedSeat.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity({
   name: 'reservations' }
@@ -17,4 +18,7 @@ export class Reservation {
 
   @OneToMany(() => ReservedSeat, (reservedSeat) => reservedSeat.reservation)
   reservedSeat: ReservedSeat;
+
+  @ManyToOne(()=> User, (user)=> user.reservation)
+  user: User
 }

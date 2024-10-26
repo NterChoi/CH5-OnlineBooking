@@ -1,15 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { UserInfo } from '../utils/userinfo.decorator';
+import { User } from '../user/entities/user.entity';
 
 @Controller('reservation')
+@UseGuards(AuthGuard('jwt'))
 export class ReservationController {
   constructor(private readonly reservationService: ReservationService) {}
 
   @Post()
-  create(@Body() createReservationDto: CreateReservationDto) {
-    return this.reservationService.create(createReservationDto);
+  create(
+    @Body() createReservationDto: CreateReservationDto,
+    @UserInfo() user : User
+  ) {
+    return this.reservationService.create(createReservationDto, user);
   }
 
   @Get()
