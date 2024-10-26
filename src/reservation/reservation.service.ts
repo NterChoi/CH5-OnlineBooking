@@ -22,12 +22,22 @@ export class ReservationService {
     @InjectRepository(Point)
     private readonly pointRepository: Repository<Point>,
     @InjectRepository(Reservation)
-    private readonly reservationRepository: Repository<Reservation>
-  ) {}
+    private readonly reservationRepository: Repository<Reservation>,
+  ) {
+  }
+
   // 선착순 예매
-  async create(createReservationDto: CreateReservationDto, user : User) {
+  async create(createReservationDto: CreateReservationDto, user: User) {
     let totalPrice = 0;
-    const schedule = await this.scheduleRepository.findOneBy({ id: createReservationDto.scheduleId });
+    const schedule = await this.scheduleRepository.findOne(
+      {
+        where: { id: createReservationDto.scheduleId },
+        relations : {
+          show: true,
+          box: true,
+          theater: true,
+        }
+      });
     if (!schedule) {
       throw new NotFoundException('존재하지 않는 일정입니다 확인해주세요.');
     }
@@ -38,11 +48,11 @@ export class ReservationService {
     });
 
     if (!seats) {
-      throw new NotFoundException('예매할 수 있는 좌석이 없습니다.')
+      throw new NotFoundException('예매할 수 있는 좌석이 없습니다.');
     }
 
-    for(let i = 0; i < createReservationDto.numberOfSpectators; i++){
-      totalPrice += seats[i].price
+    for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
+      totalPrice += seats[i].price;
     }
 
     const reservation = await this.reservationRepository.save({
@@ -52,8 +62,8 @@ export class ReservationService {
       totalPrice: totalPrice,
     });
 
-    for(let i =0 ; i < createReservationDto.numberOfSpectators; i++){
-      seats[i].isReserved = true
+    for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
+      seats[i].isReserved = true;
       await this.seatRepository.save(seats[i]);
       await this.reservedSeatRepository.save({
         reservation: reservation,
@@ -64,10 +74,15 @@ export class ReservationService {
     await this.pointRepository.save({
       user: user,
       value: reservation.totalPrice,
+      description: `${schedule.show.name} 예매`,
+    });
 
-    })
-
-
+    return {
+      '공연명': schedule.show.name,
+      '극장/상영관': `${schedule.theater.name}/${schedule.box.name}`,
+      '관람일시': schedule.showTime,
+      '관람인원': reservation.numberOfSpectators,
+    }
 
   }
 
