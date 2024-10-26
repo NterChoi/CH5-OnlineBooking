@@ -31,6 +31,6 @@ export class Show {
   endDate: string;
 
   @OneToMany(() => Schedule, (schedule) => schedule.show)
-  schedule: Schedule;
+  schedule: Schedule[];
 
 }

@@ -2,6 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { Schedule } from '../schedule/entities/schedule.entity';
 import { Theater } from '../theater/theater.entity';
 import { Grade } from './boxGrade.type';
+import { Seat } from '../seat/seat.entity';
 
 @Entity({
   name: 'boxes'
@@ -27,4 +28,8 @@ export class Box {
 
   @OneToMany(() => Schedule, (schedule) => schedule.box)
   schedule: Schedule;
+
+  @OneToMany(()=> Seat, (seat) => seat.box)
+  seat: Seat
+
 }

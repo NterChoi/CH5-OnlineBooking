@@ -14,9 +14,6 @@ export class Point {
   @Column({ type: 'varchar', nullable: false })
   description: string;
 
-  @Column({ type: 'number', nullable: false })
-  userId: number;
-
   @ManyToOne(() => User, (user) => user.point)
   user: User;
 }

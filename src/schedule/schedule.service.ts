@@ -1,17 +1,20 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
-import { UpdateScheduleDto } from './dto/update-schedule.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Show } from '../show/entities/show.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Theater } from '../theater/theater.entity';
 import { Box } from '../box/box.entity';
 import { Status } from '../show/type/showStatus.type';
 import { Schedule } from './entities/schedule.entity';
+import { Seat } from '../seat/seat.entity';
+import { Grade } from '../seat/seatGrade.type';
 
 @Injectable()
 export class ScheduleService {
   constructor(
+    @InjectEntityManager()
+    private readonly entityManger: EntityManager,
     @InjectRepository(Show)
     private readonly showRepository: Repository<Show>,
     @InjectRepository(Theater)
@@ -31,7 +34,7 @@ export class ScheduleService {
         theater: true,
       },
     });
-    console.log();
+
     const show = await this.showRepository.findOneBy({ id: createScheduleDto.showId });
     if (!theater) {
       throw new BadRequestException('존재하지 않는 극장입니다 확인해주세요.');
@@ -43,33 +46,55 @@ export class ScheduleService {
       throw new BadRequestException('현재 상영 중이지 않는 영화입니다 확인해주세요');
     }
 
-    const showTime = new Date(createScheduleDto.showTime);
+    // const showTime = new Date(createScheduleDto.showTime);
     const now = new Date();
-    if (showTime < now) {
-      throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
-    }
-
-    await this.scheduleRepository.save({
-      show: show,
-      theater: theater,
-      box: box,
-      showTime: createScheduleDto.showTime,
+    return await this.entityManger.transaction(async (manager) => {
+      for (let i = 0; i < createScheduleDto.showTime.length; i++) {
+        if (createScheduleDto.showTime[i] < now) {
+          throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
+        }
+        const schedule= await manager.getRepository(Schedule).save({
+          show: show,
+          theater: theater,
+          box: box,
+          showTime: createScheduleDto.showTime[i],
+        });
+        for (let i = 1; i <= box.goldSeatCount; i++) {
+          await manager.getRepository(Seat).save({
+            grade: Grade.Gold,
+            seatNumber: i,
+            price: 50000,
+            box: schedule.box,
+            schedule: schedule
+          });
+        }
+        for(let i = 1; i <= box.silverSeatCount; i++){
+          await manager.getRepository(Seat).save({
+            grade: Grade.Silver,
+            seatNumber: i,
+            price: 40000,
+            box: schedule.box,
+            schedule: schedule
+          })
+        }
+        for(let i = 1; i <= box.bronzeSeatCount; i++){
+          await manager.getRepository(Seat).save({
+            grade: Grade.Bronze,
+            seatNumber: i,
+            price: 40000,
+            box: schedule.box,
+            schedule: schedule
+          })
+        }
+      }
     });
   }
 
-  findAll() {
-    return `This action returns all schedule`;
+  async findAll() {
+
   }
 
   findOne(id: number) {
     return `This action returns a #${id} schedule`;
-  }
-
-  update(id: number, updateScheduleDto: UpdateScheduleDto) {
-    return `This action updates a #${id} schedule`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} schedule`;
   }
 }

@@ -3,7 +3,7 @@ import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Show } from './entities/show.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class ShowService {
@@ -23,19 +23,58 @@ export class ShowService {
     });
   }
 
-  findAll() {
-    return `This action returns all show`;
+  async findAll() {
+    return await this.showRepository.find({
+      select : {
+        image: true,
+        name: true,
+        category: true,
+        status: true,
+        openDate: true
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} show`;
+  async findByCategory(category : string) {
+    return await this.showRepository.find({
+        select: ['image', 'name', 'category', 'status', 'openDate'],
+        where:{ category: category,}
+    });
   }
 
-  update(id: number, updateShowDto: UpdateShowDto) {
-    return `This action updates a #${id} show`;
+  async findByName(name: string) {
+    console.log(name);
+    return await this.showRepository.find({
+      select: {
+        image: true,
+        name: true,
+        category: true,
+        status: true,
+        openDate: true,
+      },
+      where: {
+        name: Like(`%${name}%`),
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} show`;
+  async findOne(id: number) {
+    return await this.showRepository.find({
+      select:{
+        image : true,
+        name : true,
+        category: true,
+        info: true,
+        status: true,
+        openDate: true,
+        endDate: true,
+      },
+      relations:{
+        schedule: true
+      },
+      where: {
+        id: id,
+      },
+    });
   }
 }

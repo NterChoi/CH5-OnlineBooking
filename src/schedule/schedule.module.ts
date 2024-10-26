@@ -6,9 +6,10 @@ import { Show } from '../show/entities/show.entity';
 import { Theater } from '../theater/theater.entity';
 import { Box } from '../box/box.entity';
 import { Schedule } from './entities/schedule.entity';
+import { Seat } from '../seat/seat.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Show, Theater, Box, Schedule]),],
+  imports: [TypeOrmModule.forFeature([Show, Theater, Box, Schedule, Seat]),],
   controllers: [ScheduleController],
   providers: [ScheduleService],
 })
