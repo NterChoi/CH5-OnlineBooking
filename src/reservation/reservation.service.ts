@@ -26,7 +26,7 @@ export class ReservationService {
   ) {
   }
 
-  // 선착순 예매
+  // 선착순 입장 예매
   async create(createReservationDto: CreateReservationDto, user: User) {
     let totalPrice = 0;
     const schedule = await this.scheduleRepository.findOne(
@@ -48,10 +48,10 @@ export class ReservationService {
       relations: {
         schedule: true,
       },
-      where : {
-        schedule : {id : schedule.id},
-        isReserved : false,
-      }
+      where: {
+        schedule: { id: schedule.id },
+        isReserved: false,
+      },
     });
     console.log(seats);
 
@@ -63,35 +63,47 @@ export class ReservationService {
       totalPrice += seats[i].price;
     }
 
-    const reservation = await this.reservationRepository.save({
-      user: user,
-      schedule: schedule,
-      numberOfSpectators: createReservationDto.numberOfSpectators,
-      totalPrice: totalPrice,
-    });
+    const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
-      seats[i].isReserved = true;
-      await this.seatRepository.save(seats[i]);
-      await this.reservedSeatRepository.save({
-        reservation: reservation,
-        seat: seats[i],
+    try {
+      const reservation = await queryRunner.manager.save(Reservation, {
+        user: user,
+        schedule: schedule,
+        numberOfSpectators: createReservationDto.numberOfSpectators,
+        totalPrice: totalPrice,
       });
+
+      for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
+        seats[i].isReserved = true;
+        await queryRunner.manager.save(Seat, seats[i]);
+        await queryRunner.manager.save(ReservedSeat, {
+          reservation: reservation,
+          seat: seats[i],
+        });
+      }
+
+      await queryRunner.manager.save(Point, {
+        user: user,
+        value: -reservation.totalPrice,
+        description: `${schedule.show.name} 예매`,
+      });
+
+      await queryRunner.commitTransaction();
+
+      return {
+        '공연명': schedule.show.name,
+        '극장/상영관': `${schedule.theater.name}/${schedule.box.name}`,
+        '관람일시': schedule.showTime,
+        '관람인원': reservation.numberOfSpectators,
+      };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    await this.pointRepository.save({
-      user: user,
-      value: -reservation.totalPrice,
-      description: `${schedule.show.name} 예매`,
-    });
-
-    return {
-      '공연명': schedule.show.name,
-      '극장/상영관': `${schedule.theater.name}/${schedule.box.name}`,
-      '관람일시': schedule.showTime,
-      '관람인원': reservation.numberOfSpectators,
-    };
-
   }
 
   findAll() {
