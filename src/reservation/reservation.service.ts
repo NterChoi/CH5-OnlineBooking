@@ -106,8 +106,21 @@ export class ReservationService {
     }
   }
 
-  findAll() {
-    return `This action returns all reservation`;
+  async findAll(user : User) {
+    return await this.reservationRepository.find({
+      relations : {
+        schedule: true,
+        reservedSeat: {seat : true},
+      },
+      where : {
+        user : {
+          id: user.id,
+        }
+      },
+      order : {
+        createdAt : 'desc'
+      }
+    })
   }
 
   findOne(id: number) {

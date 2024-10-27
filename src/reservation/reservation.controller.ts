@@ -20,8 +20,10 @@ export class ReservationController {
   }
 
   @Get()
-  findAll() {
-    return this.reservationService.findAll();
+  findAll(
+    @UserInfo() user: User,
+  ) {
+    return this.reservationService.findAll(user);
   }
 
   @Get(':id')

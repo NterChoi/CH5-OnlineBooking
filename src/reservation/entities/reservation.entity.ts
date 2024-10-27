@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Schedule } from '../../schedule/entities/schedule.entity';
 import { ReservedSeat } from '../../reservedSeat/reservedSeat.entity';
 import { User } from '../../user/entities/user.entity';
@@ -24,4 +24,7 @@ export class Reservation {
 
   @Column({ type: 'int', nullable: false })
   totalPrice: number;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
+  createdAt: Date;
 }
