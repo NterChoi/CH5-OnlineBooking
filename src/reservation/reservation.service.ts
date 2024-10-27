@@ -32,22 +32,30 @@ export class ReservationService {
     const schedule = await this.scheduleRepository.findOne(
       {
         where: { id: createReservationDto.scheduleId },
-        relations : {
+        relations: {
           show: true,
           box: true,
           theater: true,
-        }
+        },
       });
+
+    console.log(schedule);
     if (!schedule) {
       throw new NotFoundException('존재하지 않는 일정입니다 확인해주세요.');
     }
 
-    const seats = await this.seatRepository.findBy({
-      schedule: schedule,
-      isReserved: false,
+    const seats = await this.seatRepository.find({
+      relations: {
+        schedule: true,
+      },
+      where : {
+        schedule : {id : schedule.id},
+        isReserved : false,
+      }
     });
+    console.log(seats);
 
-    if (!seats) {
+    if (seats.length === 0) {
       throw new NotFoundException('예매할 수 있는 좌석이 없습니다.');
     }
 
@@ -73,7 +81,7 @@ export class ReservationService {
 
     await this.pointRepository.save({
       user: user,
-      value: reservation.totalPrice,
+      value: -reservation.totalPrice,
       description: `${schedule.show.name} 예매`,
     });
 
@@ -82,7 +90,7 @@ export class ReservationService {
       '극장/상영관': `${schedule.theater.name}/${schedule.box.name}`,
       '관람일시': schedule.showTime,
       '관람인원': reservation.numberOfSpectators,
-    }
+    };
 
   }
 

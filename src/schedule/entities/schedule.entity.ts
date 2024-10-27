@@ -27,7 +27,7 @@ export class Schedule {
   showTime: Date;
 
   @OneToMany(() => Seat, (seat) => seat.schedule)
-  seat: Seat;
+  seat: Seat[];
 
   @OneToMany(() => Reservation, (reservation) => reservation.schedule)
   reservation: Reservation;
