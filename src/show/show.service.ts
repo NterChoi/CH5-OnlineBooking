@@ -43,7 +43,6 @@ export class ShowService {
   }
 
   async findByName(name: string) {
-    console.log(name);
     return await this.showRepository.find({
       select: {
         image: true,

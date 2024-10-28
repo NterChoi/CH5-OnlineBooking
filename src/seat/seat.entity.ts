@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, FindOperator, FindOperators, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Grade } from './seatGrade.type';
 import { Box } from '../box/box.entity';
 import { Schedule } from '../schedule/entities/schedule.entity';
