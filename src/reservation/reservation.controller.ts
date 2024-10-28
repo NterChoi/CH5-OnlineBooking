@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ReservationService } from './reservation.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { UpdateReservationDto } from './dto/update-reservation.dto';
+import { CreateSelectSeatReservationDto } from './dto/createSelectSeat-reservation.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/userinfo.decorator';
 import { User } from '../user/entities/user.entity';
@@ -20,21 +20,19 @@ export class ReservationController {
     return this.reservationService.create(createReservationDto, user);
   }
 
+  @Post()
+  createSelectSeat(
+    @Body() createSelectSeatReservationDto: CreateSelectSeatReservationDto,
+    @UserInfo() user : User,
+  ){
+    return this.reservationService.createSelectSeat(createSelectSeatReservationDto, user)
+  }
+
   @Get()
   findAll(
     @UserInfo() user: User,
   ) {
     return this.reservationService.findAll(user);
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reservationService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
-    return this.reservationService.update(+id, updateReservationDto);
   }
 
   @Delete(':id')
