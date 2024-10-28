@@ -16,6 +16,8 @@ import { Theater } from './theater/theater.entity';
 import { Box } from './box/box.entity';
 import { Seat } from './seat/seat.entity';
 import { ReservationModule } from './reservation/reservation.module';
+import { Reservation } from './reservation/entities/reservation.entity';
+import { ReservedSeat } from './reservedSeat/reservedSeat.entity';
 
 const typeOrmModuleOptions = {
   useFactory: async (
@@ -28,7 +30,7 @@ const typeOrmModuleOptions = {
     host: configService.get('DB_HOST'),
     port: configService.get('DB_PORT'),
     database: configService.get('DB_NAME'),
-    entities: [User, Point, Show, Schedule, Theater, Box, Seat],
+    entities: [User, Point, Show, Schedule, Theater, Box, Seat, Reservation, ReservedSeat],
     synchronize: configService.get('DB_SYNC'),
     logging: true,
   }),

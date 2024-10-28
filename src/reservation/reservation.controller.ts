@@ -9,19 +9,22 @@ import { User } from '../user/entities/user.entity';
 @Controller('reservation')
 @UseGuards(AuthGuard('jwt'))
 export class ReservationController {
-  constructor(private readonly reservationService: ReservationService) {}
+  constructor(private readonly reservationService: ReservationService) {
+  }
 
   @Post()
   create(
     @Body() createReservationDto: CreateReservationDto,
-    @UserInfo() user : User
+    @UserInfo() user: User,
   ) {
     return this.reservationService.create(createReservationDto, user);
   }
 
   @Get()
-  findAll() {
-    return this.reservationService.findAll();
+  findAll(
+    @UserInfo() user: User,
+  ) {
+    return this.reservationService.findAll(user);
   }
 
   @Get(':id')
@@ -35,7 +38,10 @@ export class ReservationController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.reservationService.remove(+id);
+  remove(
+    @Param('id') id: string,
+    @UserInfo() user: User,
+  ) {
+    return this.reservationService.remove(+id, user);
   }
 }
