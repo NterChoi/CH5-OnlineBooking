@@ -10,6 +10,7 @@ import {
 import { Schedule } from '../../schedule/entities/schedule.entity';
 import { ReservedSeat } from '../../reservedSeat/reservedSeat.entity';
 import { User } from '../../user/entities/user.entity';
+import { castArray } from 'lodash';
 
 @Entity({
   name: 'reservations' }
@@ -24,7 +25,9 @@ export class Reservation {
   @ManyToOne(() => Schedule, (schedule) => schedule.reservation)
   schedule: Schedule;
 
-  @OneToMany(() => ReservedSeat, (reservedSeat) => reservedSeat.reservation)
+  @OneToMany(() => ReservedSeat, (reservedSeat) => reservedSeat.reservation, {
+    cascade: true,
+  })
   reservedSeat: ReservedSeat;
 
   @ManyToOne(()=> User, (user)=> user.reservation)
@@ -36,6 +39,6 @@ export class Reservation {
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamp'})
   deletedAt: Date | null;
 }

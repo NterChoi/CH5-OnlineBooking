@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -105,22 +105,22 @@ export class ReservationService {
       await queryRunner.release();
     }
   }
-
-  async findAll(user : User) {
+// TODO : reservation, reservedSeat deletedAt 안보이게 하기
+  async findAll(user: User) {
     return await this.reservationRepository.find({
-      relations : {
+      relations: {
         schedule: true,
-        reservedSeat: {seat : true},
+        reservedSeat: { seat: true },
       },
-      where : {
-        user : {
+      where: {
+        user: {
           id: user.id,
-        }
+        },
       },
-      order : {
-        createdAt : 'desc'
-      }
-    })
+      order: {
+        createdAt: 'desc',
+      },
+    });
   }
 
   findOne(id: number) {
@@ -131,7 +131,58 @@ export class ReservationService {
     return `This action updates a #${id} reservation`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} reservation`;
+  async remove(id: number, user: User) {
+    const reservation = await this.reservationRepository.findOne({
+      relations : {
+        reservedSeat : {seat : true},
+        schedule : {show: true},
+      },
+      where: {
+        id: id,
+      },
+    });
+    if (!reservation) {
+      throw new NotFoundException('해당하는 예매 내역이 존재하지 않습니다. 확인해주세요');
+    }
+
+    const showTime = reservation.schedule.showTime
+    const now =  new Date()
+    const timeDiff = showTime.getTime() - now.getTime();
+    if(timeDiff < 10800){
+      throw new BadRequestException('공연 시간 3시간전까지만 예매 취소가 가능합니다');
+    }
+
+    const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.softDelete(Reservation,{ id: id });
+
+      for (let i = 0; i < reservation.numberOfSpectators; i++) {
+        const seatId = reservation.reservedSeat[i].seat.id;
+        const seat = await this.seatRepository.findOne({
+          where: {
+            id: seatId,
+          },
+        });
+        seat.isReserved = false;
+        await queryRunner.manager.save(Seat,seat);
+      }
+
+      await queryRunner.manager.save(Point,{
+        user: user,
+        value: reservation.totalPrice,
+        description: `${reservation.schedule.show.name} 예매 취소로 인한 포인트 환급`,
+      });
+
+      await queryRunner.commitTransaction();
+      return '예매가 취소 되었습니다.';
+    } catch (err){
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

@@ -59,23 +59,27 @@ export class ScheduleService {
           box: box,
           showTime: createScheduleDto.showTime[i],
         });
-        for (let i = 1; i <= box.goldSeatCount; i++) {
-          await manager.getRepository(Seat).save({
-            grade: Grade.Gold,
-            seatNumber: i,
-            price: 50000,
-            box: schedule.box,
-            schedule: schedule
-          });
+        if(box.goldSeatCount !== 0) {
+          for (let i = 1; i <= box.goldSeatCount; i++) {
+            await manager.getRepository(Seat).save({
+              grade: Grade.Gold,
+              seatNumber: i,
+              price: 50000,
+              box: schedule.box,
+              schedule: schedule
+            });
+          }
         }
-        for(let i = 1; i <= box.silverSeatCount; i++){
-          await manager.getRepository(Seat).save({
-            grade: Grade.Silver,
-            seatNumber: i,
-            price: 40000,
-            box: schedule.box,
-            schedule: schedule
-          })
+        if (box.silverSeatCount !== 0) {
+          for (let i = 1; i <= box.silverSeatCount; i++) {
+            await manager.getRepository(Seat).save({
+              grade: Grade.Silver,
+              seatNumber: i,
+              price: 40000,
+              box: schedule.box,
+              schedule: schedule
+            })
+          }
         }
         for(let i = 1; i <= box.bronzeSeatCount; i++){
           await manager.getRepository(Seat).save({
