@@ -105,9 +105,22 @@ export class ReservationService {
       await queryRunner.release();
     }
   }
-// TODO : reservation, reservedSeat deletedAt 안보이게 하기
   async findAll(user: User) {
     return await this.reservationRepository.find({
+      select : {
+        id : true,
+        numberOfSpectators : true,
+        totalPrice : true,
+        createdAt: true,
+        reservedSeat : {
+          id:true,
+          seat : {
+            id : true,
+            grade : true,
+            seatNumber : true,
+          }
+        }
+      },
       relations: {
         schedule: true,
         reservedSeat: { seat: true },
