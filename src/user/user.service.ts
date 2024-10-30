@@ -18,7 +18,7 @@ export class UserService {
   async showProfile(userId: number) {
     const point = await this.pointRepository
       .createQueryBuilder('point')
-      .select('SUM(point.value)')
+      .select('SUM(point.value)','point')
       .where('point.user.id = :userId', { userId })
       .getRawOne();
 

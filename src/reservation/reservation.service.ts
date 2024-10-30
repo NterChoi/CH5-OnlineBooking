@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { CreateSelectSeatReservationDto } from './dto/createSelectSeat-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -63,6 +63,17 @@ export class ReservationService {
       totalPrice += seats[i].price;
     }
 
+    const ownPoint = await this.pointRepository
+      .createQueryBuilder('point')
+      .select('SUM(point.value)', 'point')
+      .where('point.user.id = :user.id', { user })
+      .getRawOne();
+
+    if (ownPoint < totalPrice) {
+      throw new ConflictException('포인트가 부족합니다.');
+    }
+
+
     const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -83,7 +94,7 @@ export class ReservationService {
           seat: seats[i],
         });
       }
-
+      // TODO : point 부족할 경우 예매 실패 처리
       await queryRunner.manager.save(Point, {
         user: user,
         value: -reservation.totalPrice,
@@ -130,23 +141,45 @@ export class ReservationService {
         },
         where: {
           schedule: { id: schedule.id },
-          seatNumber: createSelectSeatReservationDto.seatNumber[i],
-          grade: createSelectSeatReservationDto.grade[i],
+          id: createSelectSeatReservationDto.seatId[i],
+          isReserved: false,
         },
       });
+      console.log(seat);
 
-      if (seat.isReserved === true) {
+      if (!seat) {
         throw new NotFoundException('해당 좌석은 이미 예매된 좌석입니다. 다른 좌석을 예매 해주세요');
       }
 
       totalPrice += seat.price;
     }
 
+    const ownPoint = await this.pointRepository
+      .createQueryBuilder('point')
+      .select('SUM(point.value)', 'point')
+      .where('point.user.id = :userId', { userId : user.id })
+      .getRawOne();
+
+    console.log(ownPoint);
+
+    if (ownPoint < totalPrice) {
+      throw new ConflictException('포인트가 부족합니다.');
+    }
+
+
     const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
+    // TODO : 동시성 처리 위해서 락 적용하기
     try {
+      // const ownPoint = await queryRunner.manager.createQueryBuilder(Point, 'point')
+      //   .select('SUM(point.value)', 'point')
+      //   .where('point.user.id =:userId', { user })
+      //   .getRawOne();
+      //
+      // if (ownPoint < totalPrice) {
+      //   throw new ConflictException('포인트가 부족합니다.');
+      // }
       const reservation = await queryRunner.manager.save(Reservation, {
         user: user,
         schedule: schedule,
@@ -155,15 +188,15 @@ export class ReservationService {
       });
 
       for (let i = 0; i < createSelectSeatReservationDto.numberOfSpectators; i++) {
-        const seat = await this.seatRepository.findOne({
+        const seat = await queryRunner.manager.findOne(Seat, {
           relations: {
             schedule: true,
           },
           where: {
             schedule: { id: schedule.id },
-            seatNumber: createSelectSeatReservationDto.seatNumber[i],
-            grade: createSelectSeatReservationDto.grade[i],
+            id: createSelectSeatReservationDto.seatId[i],
           },
+
         });
 
         seat.isReserved = true;
@@ -245,7 +278,8 @@ export class ReservationService {
     const showTime = reservation.schedule.showTime;
     const now = new Date();
     const timeDiff = showTime.getTime() - now.getTime();
-    if (timeDiff < 10800) {
+    console.log(timeDiff);
+    if (timeDiff < 3 * 60 * 60 * 1000) {
       throw new BadRequestException('공연 시간 3시간전까지만 예매 취소가 가능합니다');
     }
 

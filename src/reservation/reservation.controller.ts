@@ -20,7 +20,7 @@ export class ReservationController {
     return this.reservationService.create(createReservationDto, user);
   }
 
-  @Post()
+  @Post('select-seat')
   createSelectSeat(
     @Body() createSelectSeatReservationDto: CreateSelectSeatReservationDto,
     @UserInfo() user : User,
