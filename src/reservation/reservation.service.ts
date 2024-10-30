@@ -94,7 +94,7 @@ export class ReservationService {
           seat: seats[i],
         });
       }
-      // TODO : point 부족할 경우 예매 실패 처리
+
       await queryRunner.manager.save(Point, {
         user: user,
         value: -reservation.totalPrice,

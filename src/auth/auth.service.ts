@@ -48,7 +48,7 @@ export class AuthService {
     });
   }
 
-  // TODO : JWT 토큰 값 소멸 시간 설정하기
+
   async signIn(authSignInDto: AuthSignInDto) {
     const user: User = await this.userRepository.findOne({
       select: ['id', 'email', 'password'],
@@ -63,7 +63,7 @@ export class AuthService {
 
     const payload = { email: authSignInDto.email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {expiresIn : '1h'}),
     };
   }
 }
