@@ -4,7 +4,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './auth/auth.module';
-import { PointModule } from './point/point.module';
 import Joi from 'joi';
 import { User } from './user/entities/user.entity';
 import { Point } from './point/entities/point.entity';
@@ -53,7 +52,6 @@ const typeOrmModuleOptions = {
     }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
-    PointModule,
     ShowModule,
     ScheduleModule,
     ReservationModule,

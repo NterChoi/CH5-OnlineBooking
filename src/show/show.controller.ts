@@ -4,12 +4,14 @@ import { CreateShowDto } from './dto/create-show.dto';
 import { RolesGuard } from '../guards/roles/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { Role } from '../user/types/userRole.type';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('shows')
 export class ShowController {
   constructor(private readonly showService: ShowService) {
   }
 
+  @ApiBearerAuth()
   @UseGuards(RolesGuard)
   @Roles(Role.Admin)
   @Post('register')

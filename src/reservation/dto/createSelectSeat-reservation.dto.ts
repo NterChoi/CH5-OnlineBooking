@@ -5,23 +5,17 @@ import { ApiProperty } from '@nestjs/swagger';
 
 
 export class CreateSelectSeatReservationDto{
-  @ApiProperty()
+  @ApiProperty({example : 1})
   @IsNumber()
   @IsNotEmpty({ message: '공연 일정을 선택해주세요' })
   scheduleId: number;
 
-  @ApiProperty()
+  @ApiProperty({example : 1})
   @IsNumber()
   @IsNotEmpty({ message: '관람인원을 선택해주세요' })
   numberOfSpectators: number;
 
-  // @IsArray()
-  // @Type(()=> Number)
-  // @IsEnum(Grade, {each: true})
-  // @IsNotEmpty({ message: '좌석 등급을 선택해주세요' })
-  // grade: Grade[];
-
-  @ApiProperty()
+  @ApiProperty({example : [1]})
   @IsArray()
   @Type(()=> Number)
   @IsNumber({allowNaN: false}, { each: true})

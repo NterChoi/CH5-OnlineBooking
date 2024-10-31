@@ -5,7 +5,9 @@ import { CreateSelectSeatReservationDto } from './dto/createSelectSeat-reservati
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/userinfo.decorator';
 import { User } from '../user/entities/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('reservation')
 @UseGuards(AuthGuard('jwt'))
 export class ReservationController {

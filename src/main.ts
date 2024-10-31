@@ -11,9 +11,16 @@ async function bootstrap() {
     .setTitle('Online Booking Service')
     .setDescription('Node 6기 CH5 개인과제')
     .setVersion('1.0')
+    .addBearerAuth({type: 'http', scheme: 'bearer', bearerFormat: 'JWT'})
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions : {
+      persistAuthorization: true,
+      tagsSorter: 'alpha',
+      operationsSorter: 'alpha'
+    }
+  });
 
   await app.listen(process.env.PORT ?? 3000);
 }
