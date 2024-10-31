@@ -17,17 +17,18 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Point)
     private readonly pointRepository: Repository<Point>,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
   ) {
   }
+
   async signUp(authSignUpDto: AuthSignUpDto) {
     return await this.entityManager.transaction(async (manager) => {
-      const existingUser = await this.userRepository.findOneBy({ email: authSignUpDto.email });
+      const existingUser = await this.userRepository.findOne({ where: { email: authSignUpDto.email } });
       if (existingUser) {
         throw new ConflictException('이미 사용중인 이메일입니다.');
       }
 
-      const hashedPassword= await bcrypt.hash(authSignUpDto.password, 10);
+      const hashedPassword = await bcrypt.hash(authSignUpDto.password, 10);
 
       // 1. 유저 생성
       const user = await manager.getRepository(User).save({
@@ -43,15 +44,16 @@ export class AuthService {
         value: 1000000,
         description: '가입 지급 포인트',
       });
-      return "회원가입이 성공했습니다!";
+      return '회원가입이 성공했습니다!';
     });
   }
 
+
   async signIn(authSignInDto: AuthSignInDto) {
-    const user : User = await this.userRepository.findOne({
-        select: ['id', 'email', 'password'],
-      where : {email: authSignInDto.email}
-      })
+    const user: User = await this.userRepository.findOne({
+      select: ['id', 'email', 'password'],
+      where: { email: authSignInDto.email },
+    });
     if (_.isNil(user)) {
       throw new UnauthorizedException('이메일을 확인해주세요.');
     }
@@ -61,7 +63,7 @@ export class AuthService {
 
     const payload = { email: authSignInDto.email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, {expiresIn : '1h'}),
     };
   }
 }

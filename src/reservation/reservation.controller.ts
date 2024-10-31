@@ -5,7 +5,9 @@ import { CreateSelectSeatReservationDto } from './dto/createSelectSeat-reservati
 import { AuthGuard } from '@nestjs/passport';
 import { UserInfo } from '../utils/userinfo.decorator';
 import { User } from '../user/entities/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('reservation')
 @UseGuards(AuthGuard('jwt'))
 export class ReservationController {
@@ -20,7 +22,7 @@ export class ReservationController {
     return this.reservationService.create(createReservationDto, user);
   }
 
-  @Post()
+  @Post('select-seat')
   createSelectSeat(
     @Body() createSelectSeatReservationDto: CreateSelectSeatReservationDto,
     @UserInfo() user : User,

@@ -25,10 +25,10 @@ export class Show {
   status: Status;
 
   @Column({ type: 'date', nullable: false })
-  openDate: string;
+  openDate: Date;
 
   @Column({ type: 'date', nullable: true })
-  endDate: string;
+  endDate: Date;
 
   @OneToMany(() => Schedule, (schedule) => schedule.show)
   schedule: Schedule[];

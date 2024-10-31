@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { CreateSelectSeatReservationDto } from './dto/createSelectSeat-reservation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -44,30 +44,47 @@ export class ReservationService {
       throw new NotFoundException('존재하지 않는 일정입니다 확인해주세요.');
     }
 
-    const seats = await this.seatRepository.find({
-      relations: {
-        schedule: true,
-      },
-      where: {
-        schedule: { id: schedule.id },
-        isReserved: false,
-      },
-    });
 
 
-    if (seats.length === 0) {
-      throw new NotFoundException('예매할 수 있는 좌석이 없습니다.');
-    }
-
-    for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
-      totalPrice += seats[i].price;
-    }
 
     const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await queryRunner.startTransaction('READ COMMITTED');
 
     try {
+
+      const seats = await queryRunner.manager.find(Seat,{
+        relations: {
+          schedule: true,
+        },
+        where: {
+          schedule: { id: schedule.id },
+          isReserved: false,
+        },
+        lock : {
+          mode : 'pessimistic_write'
+        }
+      });
+
+
+      if (seats.length === 0) {
+        throw new NotFoundException('예매할 수 있는 좌석이 없습니다.');
+      }
+
+      for (let i = 0; i < createReservationDto.numberOfSpectators; i++) {
+        totalPrice += seats[i].price;
+      }
+
+      const ownPoint = await this.pointRepository
+        .createQueryBuilder('point')
+        .select('SUM(point.value)', 'point')
+        .where('point.user.id = :userId', { userId : user.id })
+        .getRawOne();
+
+      if (ownPoint < totalPrice) {
+        throw new ConflictException('포인트가 부족합니다.');
+      }
+
       const reservation = await queryRunner.manager.save(Reservation, {
         user: user,
         schedule: schedule,
@@ -109,44 +126,61 @@ export class ReservationService {
   // 좌석 지정 예매
   async createSelectSeat(createSelectSeatReservationDto: CreateSelectSeatReservationDto, user: User) {
     let totalPrice = 0;
-    const schedule = await this.scheduleRepository.findOne(
-      {
-        where: { id: createSelectSeatReservationDto.scheduleId },
-        relations: {
-          show: true,
-          box: true,
-          theater: true,
-        },
-      });
-
+    const schedule = await this.scheduleRepository.findOne({
+      where: { id: createSelectSeatReservationDto.scheduleId },
+      relations: {
+        show: true,
+        box: true,
+        theater: true,
+      },
+    });
 
     if (!schedule) {
       throw new NotFoundException('존재하지 않는 일정입니다 확인해주세요.');
     }
-    for (let i = 0; i < createSelectSeatReservationDto.numberOfSpectators; i++) {
-      const seat = await this.seatRepository.findOne({
-        relations: {
-          schedule: true,
-        },
-        where: {
-          schedule: { id: schedule.id },
-          seatNumber: createSelectSeatReservationDto.seatNumber[i],
-          grade: createSelectSeatReservationDto.grade[i],
-        },
-      });
-
-      if (seat.isReserved === true) {
-        throw new NotFoundException('해당 좌석은 이미 예매된 좌석입니다. 다른 좌석을 예매 해주세요');
-      }
-
-      totalPrice += seat.price;
-    }
 
     const queryRunner = this.reservationRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
-    await queryRunner.startTransaction();
+    await queryRunner.startTransaction('READ COMMITTED');
 
     try {
+      const selectedSeats  = [];
+
+      for (let i = 0; i < createSelectSeatReservationDto.numberOfSpectators; i++) {
+        const seat = await queryRunner.manager.findOne(Seat, {
+          relations: {
+            schedule: true,
+          },
+          where: {
+            schedule: { id: schedule.id },
+            id: createSelectSeatReservationDto.seatId[i],
+            isReserved: false,
+          },
+          lock: {
+            mode: 'pessimistic_write',
+          },
+        });
+
+        if (!seat) {
+          throw new NotFoundException('해당 좌석은 이미 예매된 좌석입니다. 다른 좌석을 예매 해주세요');
+        }
+
+        totalPrice += seat.price;
+        selectedSeats.push(seat); // 좌석을 배열에 저장
+      }
+
+      const ownPointResult = await this.pointRepository
+        .createQueryBuilder('point')
+        .select('SUM(point.value)', 'point')
+        .where('point.user.id = :userId', { userId: user.id })
+        .getRawOne();
+
+      const ownPoint = ownPointResult ? Number(ownPointResult.point) : 0;
+
+      if (ownPoint < totalPrice) {
+        throw new ConflictException('포인트가 부족합니다.');
+      }
+
       const reservation = await queryRunner.manager.save(Reservation, {
         user: user,
         schedule: schedule,
@@ -154,18 +188,7 @@ export class ReservationService {
         totalPrice: totalPrice,
       });
 
-      for (let i = 0; i < createSelectSeatReservationDto.numberOfSpectators; i++) {
-        const seat = await this.seatRepository.findOne({
-          relations: {
-            schedule: true,
-          },
-          where: {
-            schedule: { id: schedule.id },
-            seatNumber: createSelectSeatReservationDto.seatNumber[i],
-            grade: createSelectSeatReservationDto.grade[i],
-          },
-        });
-
+      for (const seat of selectedSeats) {
         seat.isReserved = true;
         await queryRunner.manager.save(Seat, seat);
         await queryRunner.manager.save(ReservedSeat, {
@@ -245,7 +268,8 @@ export class ReservationService {
     const showTime = reservation.schedule.showTime;
     const now = new Date();
     const timeDiff = showTime.getTime() - now.getTime();
-    if (timeDiff < 10800) {
+    console.log(timeDiff);
+    if (timeDiff < 3 * 60 * 60 * 1000) {
       throw new BadRequestException('공연 시간 3시간전까지만 예매 취소가 가능합니다');
     }
 

@@ -53,6 +53,19 @@ export class ScheduleService {
         if (createScheduleDto.showTime[i] < now) {
           throw new BadRequestException('현재 시간 이후에만 상영 시간 생성이 가능합니다.');
         }
+
+        const isExistSchedule = await this.scheduleRepository.findOne({
+          where : {
+            box : {id : box.id},
+            theater : {id : theater.id},
+            showTime : createScheduleDto.showTime[i]
+          }
+        })
+
+        if (isExistSchedule){
+          throw new BadRequestException('이미 해당 상영관에 공연이 예정되있습니다.');
+        }
+
         const schedule= await manager.getRepository(Schedule).save({
           show: show,
           theater: theater,
@@ -92,13 +105,5 @@ export class ScheduleService {
         }
       }
     });
-  }
-
-  async findAll() {
-
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} schedule`;
   }
 }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateShowDto } from './dto/create-show.dto';
-import { UpdateShowDto } from './dto/update-show.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Show } from './entities/show.entity';
 import { Like, Repository } from 'typeorm';

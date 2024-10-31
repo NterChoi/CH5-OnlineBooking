@@ -11,6 +11,7 @@ import { Schedule } from '../../schedule/entities/schedule.entity';
 import { ReservedSeat } from '../../reservedSeat/reservedSeat.entity';
 import { User } from '../../user/entities/user.entity';
 import { castArray } from 'lodash';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity({
   name: 'reservations' }
