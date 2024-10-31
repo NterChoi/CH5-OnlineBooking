@@ -1,26 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { SignupDto } from './dto/signup.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { JwtService } from '@nestjs/jwt';
+import { Point } from '../point/entities/point.entity';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: SignupDto) {
-    return 'This action adds a new user';
+  constructor(
+              @InjectRepository(User)
+              private userRepository: Repository<User>,
+              @InjectRepository(Point)
+              private pointRepository: Repository<Point>,
+              private readonly jwtService: JwtService) {
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
+  async showProfile(userId: number) {
+    const point = await this.pointRepository
+      .createQueryBuilder('point')
+      .select('SUM(point.value)','point')
+      .where('point.user.id = :userId', { userId })
+      .getRawOne();
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    const user = await this.userRepository.findOneBy({ id: userId });
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    return {
+      nickname: user.nickname,
+      point: point,
+    }
   }
 }
